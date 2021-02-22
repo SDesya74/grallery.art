@@ -61,7 +61,7 @@
                       </template>
                       <template v-slot:append>
                         <q-avatar v-if="!checkingEmailAvailability">
-                          <img :src="gravatarByEmail">
+                          <img :src="gravatarByEmail" alt="avatar">
                         </q-avatar>
                       </template>
                     </q-input>
@@ -117,7 +117,7 @@
                   </q-card-section>
 
                   <q-card-section align="center" class="q-gutter-md">
-                    <q-btn :to="{ name: 'login' }" color="primary" flat no-caps rounded size="md">
+                    <q-btn @click="login" color="primary" flat no-caps rounded size="md">
                       {{ $t("login_button_login_label") }}
                     </q-btn>
                     <q-btn :loading="loading" color="primary" no-caps rounded size="md" type="submit">
@@ -251,12 +251,21 @@
         loading.value = false
       }
 
+      async function login() {
+        const from = currentRoute.value.params.from
+        assert(!Array.isArray(from), "\"From\" is array, not string")
+        await router.isReady()
+        await router.push({ name: "login", params: { from, ...currentRoute.value.params } })
+
+      }
+
       return {
         ...usedUsername,
         ...usedPass,
         ...usedEmail,
         submit,
-        loading
+        loading,
+        login
       }
     }
   }

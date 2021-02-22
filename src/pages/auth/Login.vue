@@ -51,7 +51,7 @@
                 </q-card-section>
 
                 <q-card-section align="center" class="q-gutter-md">
-                  <q-btn :to="{ name: 'register' }" color="primary" flat no-caps rounded size="md">
+                  <q-btn @click="register" color="primary" flat no-caps rounded size="md">
                     {{ $t("login_button_register_label") }}
                   </q-btn>
                   <q-btn :loading="loading" color="primary" no-caps rounded size="md" type="submit">
@@ -113,9 +113,8 @@
       async function register() {
         const from = currentRoute.value.params.from
         assert(!Array.isArray(from), "\"From\" is array, not string")
-        await router
-          .isReady()
-          .then(() => router.push(`/register${ (from ? `?from=${ from }` : "") }`))
+        await router.isReady()
+        await router.push({ name: "register", params: { from, ...currentRoute.value.params } })
       }
 
       return { login, password, isPasswordVisible, submit, loading, register }
