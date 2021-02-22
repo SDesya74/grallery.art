@@ -1,0 +1,42 @@
+{
+  "name": "grallery.art",
+  "version": "0.0.1",
+  "description": "A website for artists",
+  "productName": "Grallery.ART",
+  "author": "Саня Череп <41489405+SDesya74@users.noreply.github.com>",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.0.0",
+    "core-js": "^3.6.5",
+    "crypto-js": "^4.0.0",
+    "ky": "^0.26.0",
+    "quasar": "^2.0.0-beta.1",
+    "recaptcha-v3": "^1.8.0",
+    "vue-i18n": "^9.0.0-beta.0",
+    "vue-observe-visibility": "^1.0.0"
+  },
+  "devDependencies": {
+    "@quasar/app": "^3.0.0-beta.1",
+    "@types/crypto-js": "^4.0.1",
+    "@types/node": "^10.17.15"
+  },
+  "browserslist": [
+    "last 10 Chrome versions",
+    "last 10 Firefox versions",
+    "last 4 Edge versions",
+    "last 7 Safari versions",
+    "last 8 Android versions",
+    "last 8 ChromeAndroid versions",
+    "last 8 FirefoxAndroid versions",
+    "last 10 iOS versions",
+    "last 5 Opera versions"
+  ],
+  "engines": {
+    "node": ">= 10.18.1",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  }
+}
