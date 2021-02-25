@@ -1,6 +1,24 @@
-import { RouteRecordRaw } from "vue-router"
-import { AccessToken } from "src/utils/token"
+import { NavigationGuard, NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw } from "vue-router"
 import { isAuthorized } from "src/api/auth"
+
+
+function redirectIfNotAuthorized(name: string): NavigationGuard {
+  return async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+    const authorized = await isAuthorized()
+    if (!authorized) return next({ name })
+    return next()
+  }
+}
+
+
+function redirectIfAuthorized(name: string): NavigationGuard {
+  return async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+    const authorized = await isAuthorized()
+    if (authorized) return next({ name })
+    return next()
+  }
+}
+
 
 const routes: RouteRecordRaw[] = [
   {
@@ -17,11 +35,20 @@ const routes: RouteRecordRaw[] = [
         name: "feed",
         component: () => import("pages/Feed.vue")
       },
+
+
       {
         path: "auctions",
-        name: "auctions",
+        name: "feed-auctions",
         component: () => import("pages/Auctions.vue")
       },
+      {
+        path: "auction/:id([a-zA-Z0-9-_]{2,30})",
+        name: "auction",
+        component: () => import("pages/auctions/Auction.vue")
+      },
+
+
       {
         path: "user/:username([a-zA-Z0-9-_]{2,30})",
         name: "user",
@@ -32,18 +59,31 @@ const routes: RouteRecordRaw[] = [
         path: "me",
         name: "me",
         component: () => import("pages/Me2.vue"),
-        beforeEnter: (to, from, next) => {
-          if (!isAuthorized()) return next({ name: "login" })
-          return next()
-        },
-        children: [
-          {
-
-            path: "chats",
-            name: "chats",
-            component: () => import("pages/me/Chats.vue")
-          }
-        ]
+        beforeEnter: redirectIfNotAuthorized("login")
+      },
+      {
+        path: "albums",
+        name: "albums",
+        component: () => import("pages/me/Albums.vue"),
+        beforeEnter: redirectIfNotAuthorized("login")
+      },
+      {
+        path: "auctions",
+        name: "auctions",
+        component: () => import("pages/me/Auctions.vue"),
+        beforeEnter: redirectIfNotAuthorized("login")
+      },
+      {
+        path: "chats",
+        name: "chats",
+        component: () => import("pages/me/Chats.vue"),
+        beforeEnter: redirectIfNotAuthorized("login")
+      },
+      {
+        path: "settings",
+        name: "settings",
+        component: () => import("pages/me/Settings.vue"),
+        beforeEnter: redirectIfNotAuthorized("login")
       }
     ]
   },
@@ -51,15 +91,13 @@ const routes: RouteRecordRaw[] = [
     path: "/login",
     name: "login",
     component: () => import("pages/auth/Login.vue"),
-    beforeEnter: (to, from, next) => {
-      if (isAuthorized()) return next({ name: "me" })
-      return next()
-    }
+    beforeEnter: redirectIfAuthorized("me")
   },
   {
     path: "/register",
     name: "register",
-    component: () => import("pages/auth/Register.vue")
+    component: () => import("pages/auth/Register.vue"),
+    beforeEnter: redirectIfAuthorized("me")
   },
   {
     path: "/:catchAll(.*)*",
