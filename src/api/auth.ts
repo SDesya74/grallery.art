@@ -16,16 +16,19 @@ export async function refresh(): Promise<SessionModel> {
   })
 }
 
+
 export async function authorize(login: string, password: string): Promise<boolean> {
   const { ok, payload } = await api.post<SessionModel>("login", {
     login: login,
     password: password
   })
 
-  if (!ok) return false
+  if (!ok) {
+    authorized = false
+    return false
+  }
 
   openSession(payload)
-
   return true
 }
 
@@ -34,13 +37,27 @@ export function openSession(session: SessionModel): void {
 
   AccessToken.set(access.token)
   RefreshToken.set(refresh.token)
+  authorized = true
 }
 
 export function closeSession(): void {
   AccessToken.remove()
   RefreshToken.remove()
+  authorized = false
 }
 
-export function isAuthorized() {
-  return AccessToken.exists() || RefreshToken.exists()
+
+let authorized: boolean | null = null
+
+export async function isAuthorized() {
+  if (authorized === null) {
+    try {
+      const session = await refresh()
+      openSession(session)
+    } catch {
+      closeSession()
+    }
+  }
+
+  return authorized && RefreshToken.exists()
 }
