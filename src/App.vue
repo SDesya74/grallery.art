@@ -1,6 +1,7 @@
-<template>
-  <router-view/>
+<template lang="pug">
+router-view
 </template>
+
 <script lang="ts">
-  export default {}
+    export default {}
 </script>
