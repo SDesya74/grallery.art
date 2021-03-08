@@ -20,7 +20,8 @@ q-layout(view="lHh Lpr lFf")
           color="primary"
           external-label
           label-class="bg-grey-3 text-grey-8"
-          label-position="left")&attributes(attributes)
+          label-position="left"
+        )&attributes(attributes)
       
       +fabAction()(
         @click="openCreatePostDialog"
@@ -36,7 +37,7 @@ q-layout(view="lHh Lpr lFf")
         label="Upload image"
       )
   
-  q-footer.xs(reveal)
+  //- q-footer.xs(reveal)
     q-tabs(align="justify")
       q-route-tab(no-caps to="/auctions") {{ $t("main_header_auctions_label") }}
       q-route-tab(no-caps to="/feed") {{ $t("main_header_feed_label") }}

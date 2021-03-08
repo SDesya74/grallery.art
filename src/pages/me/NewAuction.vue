@@ -1,7 +1,5 @@
-<template>
-  <q-page>
-
-  </q-page>
+<template lang="pug">
+q-page
 </template>
 
 <script lang="ts">
