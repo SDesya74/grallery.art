@@ -1,176 +1,124 @@
-<template>
-  <q-header :reveal="$q.screen.xs" elevated>
-    <q-toolbar>
-      <q-avatar>
-        <img src="icons/favicon-96x96.png">
-      </q-avatar>
-
-      <q-toolbar-title class="text-weight-medium gt-sm" shrink>
-        Grallery.ART
-      </q-toolbar-title>
-
-      <q-select
-        :menu-offset="[5, 10]"
-        :options="searchOptions"
-        @filter="searchFunction"
-        class="bg-primary q-ml-xs"
-        dark
-        debounce="50"
-        dense
-        hide-dropdown-icon
-        hide-selected
-        label="Find..."
-        option-label="username"
-        option-value="username"
-        ref="search"
-        standout
-        style="max-width: 200px"
-        use-input
-        v-model="searchUser"
-      >
-        <template v-slot:append>
-          <q-icon name="search" v-if="!searchUser"/>
-          <q-icon @click="searchUser = null" class="cursor-pointer" name="clear" v-else/>
-        </template>
-        <template v-slot:no-option>
-          <q-item class="bg-white">
-            <q-item-section class="text-grey">
-              No results
-            </q-item-section>
-          </q-item>
-        </template>
-        <template v-slot:option="option">
-          <q-item
-            @click="onOptionClick(option.opt)"
-            class="bg-white"
-            v-bind="option.itemProps"
-          >
-            <q-item-section avatar>
-              <q-avatar>
-                <img :src="option.opt.avatar">
-              </q-avatar>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="text-black"> {{ option.opt.username }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-select>
-
-      <q-space/>
-
-      <div class="q-gutter-xs row no-wrap" v-if="isAuthorized === true">
-        <q-btn class="text-subtitle1 text-weight-medium gt-xs" flat no-caps to="/auctions">
-          {{ $t("main_header_auctions_label")}}
-        </q-btn>
-        <q-btn class="text-subtitle1 text-weight-medium gt-xs" flat no-caps to="/feed">
-          {{ $t("main_header_feed_label")}}
-        </q-btn>
-        <q-btn class="q-mx-xs gt-xs" flat icon="eva-plus-outline" round>
-          <q-menu
-            :offset="[5, 13]"
-            auto-close
-            transition-hide="jump-up"
-            transition-show="jump-down"
-          >
-            <q-list style="min-width: 100px">
-              <q-item clickable>
-                <q-item-section @click="openCreatePostDialog">{{ $t("main_header_new_post_label")}}</q-item-section>
-              </q-item>
-              <q-item clickable>
-                <q-item-section>{{ $t("main_header_new_auction_label")}}</q-item-section>
-              </q-item>
-              <q-item clickable>
-                <q-item-section>{{ $t("main_header_upload_image_label")}}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-
-        <q-avatar @click="onAvatarClick" class="pointer" size="40px">
-          <img :src="`${me.avatar}&s=128`">
-          <q-menu
+<template lang="pug">
+q-header(:reveal="$q.screen.xs" elevated)
+  q-toolbar.gt-sm
+    q-avatar.cursor-pointer(@click="index")
+      img(src="icons/favicon-96x96.png")
+    
+    q-toolbar-title.gt-sm.q-mr-xs.cursor-pointer(shrink @click="index") Grallery.ART
+    
+    q-select.bg-primary(
+      :menu-offset="[5, 10]"
+      :options="searchOptions"
+      :style="{ 'flex-grow': '1 !important', 'max-width': $q.screen.xs ? '50%' : '100%' }"
+      @filter="searchFunction"
+      dark
+      debounce="50"
+      dense
+      hide-dropdown-icon
+      hide-selected
+      label="Search"
+      option-label="username"
+      option-value="username"
+      options-dark
+      ref="search"
+      standout
+      use-input
+      v-model="searchUser"
+    )
+      template(v-slot:append)
+        q-icon(name="search" v-if="!searchUser")
+        q-icon.cursor-pointer(@click="searchUser = null" name="clear" v-else)
+      
+      template(v-slot:no-option)
+        q-item.bg-white
+          q-item-section.text-grey No results
+      
+      template(v-slot:option="option")
+        q-item.bg-white(
+          @click="onOptionClick(option.opt)"
+          v-bind="option.itemProps"
+        )
+          q-item-section(avatar)
+            q-avatar
+              img(:src="option.opt.avatar")
+          q-item-section
+            q-item-label.text-black {{ option.opt.username }}
+    
+    q-space.xs
+    
+    .row.no-wrap.q-gutter-xs(v-if="isAuthorized === true")
+      .q-mx-sm.q-gutter-x-xs
+        mixin button
+          q-btn(
+            flat
+            round=!block
+            size="md"
+          )&attributes(attributes)
+            block
+        
+        +button()(icon="eva-bell-outline" class="bg-accent")
+        +button()(icon="eva-message-circle-outline")
+        +button()(icon="eva-upload-outline")
+          span Upload
+        +button()(:icon="$q.dark.isActive ? 'eva-sun-outline' : 'eva-moon-outline'" @click="$q.dark.toggle()")
+        
+        
+        q-avatar.cursor-pointer(@click="onAvatarClick" size="40px")
+          img(:src="`${me.avatar}&s=128`")
+          q-menu.gt-xs(
             :offset="[5, 13]"
             transition-hide="jump-up"
             transition-show="jump-down"
-            v-if="$q.screen.gt.xs"
             v-model="isMenuOpened"
-          >
-            <div class="column items-center q-mt-sm">
-              <q-avatar @click="profile" size="128px">
-                <img :src="`${me.avatar}&s=256`">
-              </q-avatar>
-
-              <div class="text-subtitle1 q-my-xs"> {{ me.username }}</div>
-
-              <q-btn
+          )
+            .column.items-center.q-mt-md
+              q-btn.q-pa-xs.bg-primary(@click="profile" flat round)
+                q-avatar(size="96px")
+                  img(:src="`${me.avatar}&s=256`")
+              .text-subtitle1.q-my-xs {{ me.username }}
+            
+            
+            q-separator
+            
+            q-list(style="min-width: 200px")
+              q-item(@click="settings" clickable)
+                q-item-section My commissions
+              q-item(clickable)
+                q-item-section My auctions
+            
+            .column.items-center.q-py-md
+              q-btn(
                 :label="$t('main_desktop_logout_label')"
                 @click="logout"
                 color="primary"
                 no-caps
                 push
                 size="sm"
-              />
-            </div>
-
-            <q-separator class="q-my-sm"/>
-
-            <q-list style="min-width: 200px;">
-              <q-item clickable>
-                <q-item-section> {{ $t("main_desktop_settings_label")}}</q-item-section>
-              </q-item>
-              <q-item clickable>
-                <q-item-section>{{ $t("main_desktop_auctions_label")}}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-avatar>
-      </div>
-      <div v-else-if="isAuthorized === false">
-        <q-btn @click="register" class="text-subtitle1 text-weight-medium" flat no-caps dense>
-          {{ $t("main_register_button_label") }}
-        </q-btn>
-        <q-btn @click="login" class="text-subtitle1 text-weight-medium" flat no-caps dense>
-          {{ $t("main_login_button_label") }}
-        </q-btn>
-      </div>
-      <div class="flex q-gutter-xs row items-center no-wrap" v-else>
-        <q-skeleton animation="fade" type="QBtn" width="100px"/>
-        <q-skeleton animation="fade" type="QBtn" width="70px"/>
-        <q-skeleton animation="fade" class="q-mx-xs" size="35px" type="circle"/>
-        <q-skeleton animation="fade" size="40px" type="QAvatar"/>
-      </div>
-    </q-toolbar>
-
-    <!--
-    <q-slide-transition v-if="$q.screen.xs">
-      <div v-show="isMenuOpened">
-        <q-separator inset/>
-        <div class="q-pa-sm">
-          <q-list>
-            <q-item clickable v-ripple>
-              <q-item-section>
-                <q-item-label> {{ $t("main_mobile_auctions_label") }}</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item clickable v-ripple>
-              <q-item-section>
-                <q-item-label> {{ $t("main_mobile_settings_label") }}</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item @click="logout" clickable v-ripple>
-              <q-item-section>
-                <q-item-label> {{ $t("main_mobile_logout_label") }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-      </div>
-    </q-slide-transition>
-    -->
-  </q-header>
+              )
+    
+    .row.no-wrap.q-gutter-xs.q-ml-xs(v-else-if="isAuthorized === false")
+      q-btn.column.text-weight-medium.bg-accent(
+        :class="{ 'text-subtitle1': $q.screen.gt.xs }"
+        :dense="$q.screen.xs"
+        @click="register"
+        flat
+        no-caps
+      ) {{ $t("main_register_button_label") }}
+      q-btn.column.text-weight-medium(
+        :class="{ 'text-subtitle1': $q.screen.gt.xs }"
+        :dense="$q.screen.xs"
+        @click="login"
+        flat
+        no-caps
+      ) {{ $t("main_register_button_label") }}
+    .row.no-wrap.flex.q-gutter-xs.items-center(v-else)
+      mixin skeleton
+        q-skeleton(animation="fade")&attributes(attributes)
+      
+      +skeleton()(type="QBtn" width="100px")
+      +skeleton()(type="QBtn" width="70px")
+      +skeleton.q-mx-xs()(type="circle" size="35px")
+      +skeleton()(size="40px" type="QAvatar")
 </template>
 
 <script lang="ts">

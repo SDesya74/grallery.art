@@ -1,277 +1,176 @@
-<template>
-  <q-page class="row items-start justify-evenly q-gutter-xs q-pa-sm">
+<template lang="pug">
+q-page
+  template(v-if="$q.screen.xs")
+    .column.justify-evenly.items-center.q-mt-md
+      q-skeleton(animation="fade" size="96px" type="circle" v-show="!avatarLoaded")
+      q-avatar(size="96px" v-show="avatarLoaded")
+        img(:src="avatar" @load="avatarLoaded = true" alt="Avatar" width="96px")
+      
+      .column.text-h5.text-center
+        q-skeleton(animation="fade" height="32px" type="text" v-show="!nickname" width="100px")
+        div(v-if="nickname") {{ nickname }}
+      
+      q-btn-group(flat spread stretch)
+        q-btn(:to="{ name: 'albums' }" dense icon="eva-phone-outline" stack) Albums
+        q-btn(:to="{ name: 'auctions' }" dense icon="eva-cube-outline" stack) Auctions
+        q-btn(:to="{ name: 'chats' }" dense icon="eva-message-circle-outline" stack) Chats
+        q-btn(:to="{ name: 'settings' }" dense icon="eva-settings2-outline" stack) Settings
+      
+      q-responsive.q-my-sm.full-width(:ratio="16/9")
+        q-carousel.full-width(animated arrows swipeable transition-next="slide-left" transition-prev="slide-right" v-model="carouselSlide")
+          q-carousel-slide(v-for="(image, index) in images" :img-src="image" :name="index")
+      
+      .row.full-width
+        q-input.fit.q-pa-xs(
+          @click.prevent="showCreatePostDialog = true"
+          dense
+          outlined
+          placeholder="Write your post!"
+          rounded
+          tabindex="-1"
+        )
+        q-dialog(maximized v-model="showCreatePostDialog")
+          q-card
+            q-card-section
+              .text-h6 Write your post!
+            
+            q-card-section
+              | QEditor
+            
+            q-card-section
+              q-uploader.full-width(label="Images" multiple url="https://api.grallery.art/upload")
+            
+            q-card-section(align="right")
+              q-btn(color="primary" flat v-close-popup) Ok
+              q-btn(color="primary" flat v-close-popup) Cancel
+  
+  template(v-else)
+    .row.items-center.justify-evenly
+      .constraint.q-pa-sm
+        .row
+          .column
+            .row
+              .column
+                q-skeleton(animation="fade" size="96px" type="circle" v-show="!avatarLoaded")
+                q-avatar(size="96px" v-show="avatarLoaded")
+                  img(:src="avatar" @load="avatarLoaded = true" alt="Avatar" width="96px")
+              
+              .column.justify-evenly.q-ml-md
+                .row.text-h5.text-center
+                  .column
+                    q-skeleton(animation="fade" height="32px" type="text" v-show="!nickname" width="100px")
+                    div(v-if="nickname") {{ nickname }}
+                  
+                  q-space
+                  
+                  .column
+                    q-btn(outline) Follow
+                
+                q-btn-group.row(outline)
+                  q-btn(outline :class="{ 'small-font': $q.screen.xs }") {{ $t("me_button_commissions_label") }}
+                  q-btn(outline :class="{ 'small-font': $q.screen.xs }") {{ $t("me_button_albums_label") }}
+                  q-btn(outline :class="{ 'small-font': $q.screen.xs }") {{ $t("me_button_chat_label") }}
+                  q-btn(outline :class="{ 'small-font': $q.screen.xs }") {{ $t("me_button_auctions_label") }}
+          
+          q-space
+          
+          .column.justify-evenly.items-center
+            .row Social
+            .row
+              q-avatar(size="xl" v-for="network in social")
+                q-icon(:color="network.color" :name="network.icon")
+          
+          q-space
+        q-card.col-8.q-pa-sm.q-ma-xs(bordered flat)
+          | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tempus lectus vestibulum mollis
+          | hendrerit. Morbi ac lacus non risus ullamcorper tincidunt. In hac habitasse platea dictumst. Pellentesque
+          | sit amet nisl non justo gravida scelerisque vel ac lectus. Quisque pellentesque ullamcorper diam non
+          | mattis. Ut feugiat tellus id porttitor imperdiet. Maecenas in risus lectus. Sed non ex orci.
+          | Etiam velit erat, placerat quis consequat ac, posuere et augue. Suspendisse potenti. Donec tincidunt
+          | tellus in porta dignissim. Etiam volutpat neque vitae nunc pulvinar pharetra in venenatis augue. Quisque
+          | finibus faucibus arcu, in vestibulum ex consectetur id. Fusce tincidunt ac nisi vitae volutpat. In sed
+          | blandit urna, vitae vulputate lorem. Morbi tellus diam, ultrices quis dignissim id, interdum id sapien.
+          | Duis maximus semper nulla quis consequat. In at augue non nisi consectetur hendrerit. Sed sed dolor
+          | pretium, blandit tortor eu, pretium lacus. Nulla interdum libero pharetra bibendum volutpat. Suspendisse
+          | eu varius sapie
+        q-card.col-3.q-pa-sm.q-ma-xs(bordered flat)
+          .row Followers: { value }
+          .row Follows: { value }
 
-
-
-    <div class="column q-gutter-lg items-center">
-      <div class="row constraint">
-        <div class="column">
-          <div :class="{ row: $q.screen.gt.xs, 'q-pa-sm': true, 'justify-evenly': $q.screen.xs }">
-
-            <div class="column q-mr-sm">
-              <q-skeleton animation="fade" size="96px" type="circle" v-show="!avatarLoaded"/>
-              <q-avatar size="96px" v-show="avatarLoaded">
-                <img :src="`${me.avatar}&s=256`" @load="avatarLoaded = true" width="96px"/>
-              </q-avatar>
-            </div>
-
-            <div class="column q-pa-xs">
-              <div :class="{row: $q.screen.gt.xs, 'justify-evenly': true}">
-                <div class="column text-h4 text-center">
-                  <q-skeleton animation="fade" height="40px" type="text" v-show="!me?.username" width="150px"/>
-                  <div v-if="me?.username"> {{ me.username }}</div>
-                </div>
-                <q-space/>
-                <div class="column q-my-sm">
-                  <div class="row justify-evenly">
-                    <q-btn @click="followUser" color="primary"> Follow</q-btn>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <q-btn-group class="primary row " outline>
-                  <q-btn :class="{ 'small-font': $q.screen.xs}" outline> {{ $t("me_button_commissions_label") }}</q-btn>
-                  <q-btn :class="{ 'small-font': $q.screen.xs}" outline> {{ $t("me_button_albums_label") }}</q-btn>
-                  <q-btn :class="{ 'small-font': $q.screen.xs}" outline> {{ $t("me_button_chat_label") }}</q-btn>
-                  <q-btn :class="{ 'small-font': $q.screen.xs}" outline> {{ $t("me_button_auctions_label") }}</q-btn>
-                </q-btn-group>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="column q-pa-sm gt-xs">
-          <q-list class="q-gutter-xs">
-            <q-btn color="red-6" flat icon="eva-google" round size="md"/>
-            <q-btn color="light-blue-8" flat icon="eva-facebook" round size="md"/>
-            <q-btn color="light-blue-13" flat icon="eva-twitter" round size="md"/>
-          </q-list>
-        </div>
-      </div>
-
-      <!-- WYSIWYG Editor -->
-      <!--
-      <q-card>
-        <div class="q-pa-md q-gutter-sm">
-          <q-editor
-            :dense="$q.screen.lt.md"
-            :fonts="{
-              arial: 'Arial',
-              arial_black: 'Arial Black',
-              comic_sans: 'Comic Sans MS',
-              courier_new: 'Courier New',
-              impact: 'Impact',
-              lucida_grande: 'Lucida Grande',
-              times_new_roman: 'Times New Roman',
-              verdana: 'Verdana'
-            }"
-            :toolbar="[
-              [
-                {
-                  label: $q.lang.editor.align,
-                  icon: $q.iconSet.editor.align,
-                  fixedLabel: true,
-                  list: 'only-icons',
-                  options: ['left', 'center', 'right', 'justify']
-                }
-              ],
-              [ 'bold', 'italic', 'strike', 'underline', 'subscript', 'superscript' ],
-              [ 'token', 'hr', 'link', 'custom_btn' ],
-              [ 'fullscreen' ],
-              [
-                {
-                  label: $q.lang.editor.formatting,
-                  icon: $q.iconSet.editor.formatting,
-                  list: 'no-icons',
-                  options: [
-                    'p',
-                    'h1',
-                    'h2',
-                    'h3',
-                    'h4',
-                    'h5',
-                    'h6',
-                    'code'
-                  ]
-                },
-                {
-                  label: $q.lang.editor.fontSize,
-                  icon: $q.iconSet.editor.fontSize,
-                  fixedLabel: true,
-                  fixedIcon: true,
-                  list: 'no-icons',
-                  options: [
-                    'size-1',
-                    'size-2',
-                    'size-3',
-                    'size-4',
-                    'size-5',
-                    'size-6',
-                    'size-7'
-                  ]
-                },
-                {
-                  label: $q.lang.editor.defaultFont,
-                  icon: $q.iconSet.editor.font,
-                  fixedIcon: true,
-                  list: 'no-icons',
-                  options: [
-                    'default_font',
-                    'arial',
-                    'arial_black',
-                    'comic_sans',
-                    'courier_new',
-                    'impact',
-                    'lucida_grande',
-                    'times_new_roman',
-                    'verdana'
-                  ]
-                },
-                'removeFormat'
-              ],
-              [ 'quote', 'unordered', 'ordered', 'outdent', 'indent' ],
-              [ 'undo', 'redo' ]
-            ]"
-            v-model="newPost"
-          />
-          <q-card bordered flat>
-            <q-card-section>
-              <pre style="white-space: pre-line">{{ newPost }}</pre>
-            </q-card-section>
-          </q-card>
-
-          <q-card bordered flat>
-            <q-card-section v-html="newPost"/>
-          </q-card>
-        </div>
-      </q-card>
-      -->
-
-      <!-- Gallery -->
-      <!--
-      <q-card
-        bordered
-        class="column constraint"
-        flat
-      >
-        <q-card-section>
-          text
-        </q-card-section>
-      </q-card>
-      -->
-
-      <!-- Posts -->
-      <!--
-      <div class="column q-mt-lg constraint">
-        <q-infinite-scroll :offset="250" @load="onLoad">
-          <q-card :key="index" bordered class="post q-ma-sm q-mb-md" flat v-for="(post, index) in posts">
-            <q-item>
-              <q-item-section avatar>
-                <q-avatar>
-                  <img :src="me.avatar">
-                </q-avatar>
-              </q-item-section>
-
-              <q-item-section>
-                <q-item-label>{{ me.username }}</q-item-label>
-                <q-item-label caption> {{ date.formatDate(Date.now(), "DD MMMM YYYY") }}</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-separator/>
-            <component
-              :data="item.data"
-              :key="index"
-              v-bind:is="`${item.type}-element`"
-              v-for="(item, index) in post.content"
-            />
-          </q-card>
-          <template v-slot:loading>
-            <div class="row justify-center q-my-md">
-              <q-spinner-dots color="primary" size="40px"/>
-            </div>
-          </template>
-        </q-infinite-scroll>
-      </div>
-      -->
-    </div>
-  </q-page>
 </template>
 
 <script lang="ts">
-  import { reactive, ref } from "vue"
+  import { ref } from "vue"
   import { UserModel } from "src/api/models"
   import { api } from "src/api"
-  import { date } from "quasar"
-  import TextElement from "components/post/TextElement.vue"
-  import ImageElement from "components/post/ImageElement.vue"
-
-  export default {
-    components: {
-      TextElement,
-      ImageElement
+  
+  const images = [
+    "https://cdn.quasar.dev/img/mountains.jpg",
+    "https://cdn.quasar.dev/img/parallax1.jpg",
+    "https://cdn.quasar.dev/img/parallax2.jpg",
+    "https://cdn.quasar.dev/img/quasar.jpg",
+    "https://cdn.quasar.dev/img/cat.jpg",
+    "https://cdn.quasar.dev/img/linux-avatar.png",
+    "https://cdn.quasar.dev/img/material.png",
+    "https://cdn.quasar.dev/img/donuts.png"
+  ]
+  
+  const social = [
+    {
+      name: "Google",
+      icon: "eva-google",
+      color: "red-6"
     },
+    {
+      name: "Facebook",
+      icon: "eva-facebook",
+      color: "light-blue-8"
+    },
+    {
+      name: "Twitter",
+      icon: "eva-twitter",
+      color: "light-blue-13"
+    }
+  ]
+  
+  
+  export default {
     setup() {
-      const me = reactive<UserModel>({} as UserModel)
+      const username = ref()
+      const nickname = ref()
+      const avatar = ref()
       const avatarLoaded = ref(false)
-
+      
       api.get<UserModel>("me", true)
         .then(({ payload: user }) => {
-          me.username = user.username
-          me.avatar = user.avatar
+          username.value = user.username
+          nickname.value = user.nickname
+          avatar.value = user.avatar
         })
         .catch(() => void 0)
-
-
-      type PostContent = {
-        type: "text" | "image",
-        data: string
+      
+      const carouselSlide = ref(1)
+      const showCreatePostDialog = ref(false)
+      
+      const postContent = ref("")
+      
+      const isCarouselFullscreen = ref(false)
+      
+      return {
+        username,
+        nickname,
+        avatar,
+        avatarLoaded,
+        carouselSlide,
+        showCreatePostDialog,
+        
+        postContent,
+        isCarouselFullscreen,
+        
+        images,
+        social
       }
-
-      type Post = {
-        created: number, // Date
-        content: PostContent[]
-      }
-
-
-      const posts = ref<Post[]>([ {
-        created: Date.now(),
-        content: [
-          {
-            type: "text",
-            data: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sodales urna quis commodo tempus. Integer ornare sem at eros imperdiet dictum. Nullam ultrices libero at enim blandit laoreet. Vestibulum sit amet turpis eget tellus pretium ultrices. Nulla ut auctor est. Suspendisse potenti. Maecenas lobortis gravida nisi vel feugiat. Cras rutrum molestie vulputate. Ut scelerisque iaculis lectus, posuere varius sapien pretium et. Mauris dapibus odio ipsum, nec euismod elit finibus ac. Morbi dui diam, mattis imperdiet ipsum vel, hendrerit mattis diam. In pharetra feugiat dictum. Morbi a massa tristique, sollicitudin dui a, elementum nisi. Etiam felis sapien, molestie ut venenatis in, eleifend id est."
-          }
-        ]
-      } ])
-
-      function onLoad(index: number, done: () => void) {
-        setTimeout(async () => {
-          const symbols = "abcdefghijklmnopqrstuvwxyz    "
-          for (let i = 0; i < 5; i++) {
-            const text = new Array((Math.random() * 128 + 64) | 0)
-              .join()
-              .replace(/(.|$)/g, () => symbols[(Math.random() * symbols.length) | 0])
-            posts.value.push({
-              created: Date.now(),
-              content: [
-                {
-                  type: "text",
-                  data: text
-                }, {
-                  type: "image",
-                  data: `https://picsum.photos/${ (Math.random() * 100 + 500) | 0 }/${ (Math.random() * 200 + 500) | 0 }?t=${ i }`
-                }
-              ]
-            })
-          }
-          done()
-        }, 500)
-      }
-
-
-      const newPost = ref()
-
-      return { me, avatarLoaded, posts, onLoad, date, newPost }
     }
   }
 </script>
+

@@ -180,7 +180,7 @@ q-layout
         
         return { username, isUsernameAvailable, checkingUsernameAvailability }
       }
-
+      
       const usedUsername = useUsername()
       const usedPass = usePassword()
       const usedEmail = useEmail()
