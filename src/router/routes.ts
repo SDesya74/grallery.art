@@ -35,8 +35,8 @@ const routes: RouteRecordRaw[] = [
         name: "feed",
         component: () => import("pages/Feed.vue")
       },
-
-
+      
+      
       {
         path: "auctions",
         name: "feed-auctions",
@@ -47,18 +47,18 @@ const routes: RouteRecordRaw[] = [
         name: "auction",
         component: () => import("pages/auctions/Auction.vue")
       },
-
-
+      
+      
       {
         path: "user/:username([a-zA-Z0-9-_]{2,30})",
         name: "user",
         component: () => import("pages/User.vue")
       },
-
+      
       {
         path: "me",
         name: "me",
-        component: () => import("pages/Me2.vue"),
+        component: () => import("pages/Me.vue"),
         beforeEnter: redirectIfNotAuthorized("login")
       },
       {
