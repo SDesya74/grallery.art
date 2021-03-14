@@ -84,4 +84,37 @@ export async function authorize(login: string, password: string): Promise<void> 
 }
 
 
-export { api }
+export async function getUserByUsername(username: string): Promise<UserModel> {
+  const { payload } = await get<UserModel>(`user/${ username }`)
+  return payload
+}
+
+
+export async function getMe(): Promise<UserModel> {
+  const { payload } = await get<UserModel>("me", true)
+  return payload
+}
+
+
+export async function isEmailAvailable(email: string): Promise<boolean> {
+  const { payload } = await get<AvailabilityPayload>(`available/email?email=${ email }`)
+  return payload.available
+}
+
+
+export async function isUsernameAvailable(username: string): Promise<boolean> {
+  const { payload } = await get<AvailabilityPayload>(`available/username?username=${ username }`)
+  return payload.available
+}
+
+
+export async function register(request: RegisterRequest): Promise<SessionModel> {
+  const { payload } = await post<SessionModel>("register", request)
+  return payload
+}
+
+
+export async function searchUsers(q: string) {
+  const { payload } = await get<SearchUsersResponse>(`search/user?fields[user]=username,avatar&q=${ q }`)
+  return payload
+}
