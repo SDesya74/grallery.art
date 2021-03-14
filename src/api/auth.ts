@@ -1,34 +1,9 @@
 import { SessionModel } from "src/api/models"
 import { AccessToken, RefreshToken } from "src/utils/token"
-import { api } from "src/api/index"
+import { refreshSession } from "api"
 
 
-export async function refresh(): Promise<SessionModel> {
-  return new Promise(async (resolve, reject) => {
-    if (!RefreshToken.exists()) return reject()
-    
-    const { ok, payload } = await api.post<SessionModel>("refresh", {
-      refresh_token: RefreshToken.get()
-    })
-    
-    if (ok) resolve(payload)
-    else reject(payload)
-  })
-}
-
-
-export async function authorize(login: string, password: string): Promise<void> {
-  const { ok, payload } = await api.post<SessionModel>("login", {
-    login: login,
-    password: password
-  })
-  
-  if (!ok) {
-    closeSession()
-    throw new Error(payload.message)
-  }
-  openSession(payload)
-}
+let authorized: boolean | null = null
 
 export function openSession(session: SessionModel): void {
   const { access, refresh } = session
@@ -44,13 +19,10 @@ export function closeSession(): void {
   authorized = false
 }
 
-
-let authorized: boolean | null = null
-
 export async function isAuthorized() {
   if (authorized === null) {
     try {
-      const session = await refresh()
+      const session = await refreshSession()
       openSession(session)
     } catch {
       closeSession()

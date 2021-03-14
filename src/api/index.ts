@@ -1,40 +1,86 @@
 import ky from "ky"
-import { AccessToken } from "src/utils/token"
-import { ApiResponse } from "src/api/models"
-import { openSession, refresh } from "src/api/auth"
+import { AccessToken, RefreshToken } from "src/utils/token"
+import {
+  ApiResponse,
+  AvailabilityPayload,
+  RegisterRequest,
+  SearchUsersResponse,
+  SessionModel,
+  UserModel
+} from "src/api/models"
+import { closeSession, openSession } from "src/api/auth"
 
 const client = ky.extend({
   prefixUrl: "https://api.grallery.art",
   throwHttpErrors: false
 })
 
-const api = {
-  post: async function <T = any>(endpoint: string, payload: object, auth?: boolean): Promise<ApiResponse<T>> {
-    if (!auth) return await client.post(endpoint, { json: payload }).json<ApiResponse<T>>()
+function throwIfNotOk<T>(json: ApiResponse<T>) {
+  if (!json.ok) throw new Error(json.payload.toString())
+}
 
-    if (AccessToken.exists()) {
-      let response = await client.post(endpoint, { json: payload, headers: AccessToken.bearer() })
-      if (response.status != 401) return await response.json() as ApiResponse<T> // 401 - unauthorized
-    }
-
-    const session = await refresh()
-    openSession(session)
-
-    return this.post<T>(endpoint, payload, auth)
-  },
-  get: async function <T = any>(endpoint: string, auth?: boolean): Promise<ApiResponse<T>> {
-    if (!auth) return await client.get(endpoint).json<ApiResponse<T>>()
-
-    if (AccessToken.exists()) {
-      let response = await client.get(endpoint, { headers: AccessToken.bearer() })
-      if (response.status != 401) return await response.json() as ApiResponse<T> // 401 - unauthorized
-    }
-
-    const session = await refresh()
-    openSession(session)
-
-    return this.get<T>(endpoint, auth)
+async function post<T = any>(endpoint: string, payload: object, auth?: boolean): Promise<ApiResponse<T>> {
+  if (!auth) {
+    const json = await client.post(endpoint, { json: payload }).json() as ApiResponse<T>
+    throwIfNotOk(json)
+    return json
   }
+  
+  if (AccessToken.exists()) {
+    let response = await client.post(endpoint, { json: payload, headers: AccessToken.bearer() })
+    if (response.status != 401) { // 401 - unauthorized
+      const json = await response.json() as ApiResponse<T>
+      throwIfNotOk(json)
+      return json
+    }
+  }
+  
+  const session = await refreshSession()
+  openSession(session)
+  
+  return post(endpoint, payload, auth)
+}
+
+async function get<T = any>(endpoint: string, auth?: boolean): Promise<ApiResponse<T>> {
+  if (!auth) {
+    const json = await client.get(endpoint).json() as ApiResponse<T>
+    throwIfNotOk(json)
+    return json
+  }
+  
+  if (AccessToken.exists()) {
+    const response = await client.get(endpoint, { headers: AccessToken.bearer() })
+    if (response.status != 401) { // 401 - unauthorized
+      const json = await response.json() as ApiResponse<T>
+      throwIfNotOk(json)
+      return json
+    }
+  }
+  
+  const session = await refreshSession()
+  openSession(session)
+  
+  return get(endpoint, auth)
+}
+
+export async function refreshSession(): Promise<SessionModel> {
+  const { payload } = await post<SessionModel>("refresh", {
+    refresh_token: RefreshToken.get()
+  })
+  return payload
+}
+
+export async function authorize(login: string, password: string): Promise<void> {
+  const { ok, payload } = await post<SessionModel>("login", {
+    login: login,
+    password: password
+  })
+  
+  if (!ok) {
+    closeSession()
+    throw new Error(payload.message)
+  }
+  openSession(payload)
 }
 
 
