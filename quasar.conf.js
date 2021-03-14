@@ -1,4 +1,5 @@
 const { configure } = require("quasar/wrappers")
+const path = require("path")
 
 module.exports = configure(function (/* ctx */) {
     return {
@@ -26,6 +27,9 @@ module.exports = configure(function (/* ctx */) {
                     .test(/\.pug$/)
                     .use("pug-plain-loader")
                     .loader("pug-plain-loader")
+
+                chain.resolve.alias
+                    .set("api", path.resolve(__dirname, "src/api"))
             }
         },
 
