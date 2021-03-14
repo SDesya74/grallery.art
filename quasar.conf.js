@@ -11,7 +11,8 @@ module.exports = configure(function (/* ctx */) {
         ],
 
         css: [
-            "app.sass"
+            "app.sass",
+            "feed.sass"
         ],
 
         extras: [
