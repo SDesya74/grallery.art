@@ -55,9 +55,7 @@ q-layout
                     rounded
                     v-model="password"
                     :rules=`[
-                        val => val.length > 8 || $t('register_too_short_password_error'),
-                        val => val.toLowerCase() !== val || $t('register_password_must_contain_uppercase_error'),
-                        val => val.toUpperCase() !== val || $t('register_password_must_contain_lowercase_error'),
+                        val => val.length > 6 || $t('register_too_short_password_error'),
                         val => /\d/.test(val) || $t('register_password_must_contain_numbers_error')
                     ]`
                   )
@@ -180,7 +178,7 @@ q-layout
           }
         }
         
-        return { username, isUsernameAvailable, checkingUsernameAvailability }
+        return { username, usernameAvailable, checkingUsernameAvailability }
       }
       
       const usedUsername = useUsername()
@@ -225,8 +223,3 @@ q-layout
     }
   }
 </script>
-
-<style lang="sass" scoped>
-  .constraint
-    min-width: 650px
-</style>
