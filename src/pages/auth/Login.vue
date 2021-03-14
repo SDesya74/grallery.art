@@ -36,43 +36,42 @@ q-layout
 
 <script lang="ts">
   import { ref } from "vue"
-  import { router } from "src/router"
+  import { router, routeTo } from "src/router"
   import assert from "assert"
-  import { authorize } from "src/api/auth"
+  import { authorize } from "api"
   import { useQuasar } from "quasar"
-
+  
   export default {
     setup() {
       const $q = useQuasar()
       const { currentRoute } = router
-
+      
       const isPasswordVisible = ref(false)
       const loading = ref(false)
       const login = ref("")
       const password = ref("")
-
+      
       async function submit() {
         loading.value = true
-
-        if (await authorize(login.value, password.value)) {
+        
+        try {
+          await authorize(login.value, password.value)
           const name = currentRoute.value.params.from ?? "index"
-          assert(!Array.isArray(name), "\"From\" is array, not string")
-          await router.isReady()
-          await router.push({ name })
-        } else {
-          $q.notify("Error in authentication")
+          assert(typeof name == "string", "\"Name\" is not string")
+          await routeTo(name)
+        } catch (e) {
+          $q.notify(e.message)
+        } finally {
+          loading.value = false
         }
-
-        loading.value = false
       }
-
+      
       async function register() {
         const from = currentRoute.value.params.from
-        assert(!Array.isArray(from), "\"From\" is array, not string")
-        await router.isReady()
-        await router.push({ name: "register", params: { from, ...currentRoute.value.params } })
+        assert(typeof from == "string", "\"From\" is not string")
+        await routeTo("register", { from })
       }
-
+      
       return { login, password, isPasswordVisible, submit, loading, register }
     }
   }

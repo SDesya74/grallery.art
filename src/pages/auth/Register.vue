@@ -22,7 +22,7 @@ q-layout
                         val => val.length > 1 || $t('register_too_short_username_error'),
                         val => val.length < 30 || $t('register_too_long_username_error'),
                         val => /^[a-zA-Z0-9-_]+$/.test(val) || $t('register_invalid_char_in_username_error'),
-                        isUsernameAvailable
+                        usernameAvailable
                     ]`
                   )
                     template(v-slot:prepend)
@@ -38,7 +38,7 @@ q-layout
                     :rules=`[
                         val => val.length > 0 || $t('register_empty_email_error'),
                         val => validateEmail(val) || $t('register_invalid_email_error'),
-                        isEmailAvailable
+                        emailAvailable
                     ]`
                   )
                     template(v-slot:prepend)
@@ -107,14 +107,13 @@ q-layout
 <script lang="ts">
   import { computed, onBeforeUnmount, onMounted, ref } from "vue"
   import { load, ReCaptchaInstance } from "recaptcha-v3"
-  import { api } from "src/api"
-  import { router } from "src/router"
+  import { router, routeTo } from "src/router"
   import { MD5 } from "crypto-js"
-  import { AvailabilityPayload, SessionModel } from "src/api/models"
   import assert from "assert"
   import { useI18n } from "vue-i18n"
   import { openSession } from "src/api/auth"
   import { useQuasar } from "quasar"
+  import { isEmailAvailable, isUsernameAvailable, register } from "api"
   
   function usePassword() {
     const password = ref("")
@@ -149,33 +148,36 @@ q-layout
           return re.test(email)
         }
         
-        async function isEmailAvailable(email: string) {
+        async function emailAvailable(email: string) {
           checkingEmailAvailability.value = true
-          
-          const { ok, payload } = await api.get<AvailabilityPayload>(`available/email?email=${ email }`)
-          
-          checkingEmailAvailability.value = false
-          
-          if (ok) return payload.available || t("register_email_taken_error")
-          return t("register_request_error")
+          try {
+            const available = await isEmailAvailable(email)
+            
+            return available || t("register_email_taken_error")
+          } catch {
+            return t("register_request_error")
+          } finally {
+            checkingEmailAvailability.value = false
+          }
         }
         
-        return { email, gravatarByEmail, validateEmail, isEmailAvailable, checkingEmailAvailability }
+        return { email, gravatarByEmail, validateEmail, emailAvailable, checkingEmailAvailability }
       }
       
       function useUsername() {
         const username = ref("")
         const checkingUsernameAvailability = ref(false)
         
-        async function isUsernameAvailable(username: string) {
+        async function usernameAvailable(username: string) {
           checkingUsernameAvailability.value = true
-          
-          const { ok, payload } = await api.get<AvailabilityPayload>(`available/username?username=${ username }`)
-          
-          checkingUsernameAvailability.value = false
-          
-          if (ok) return payload.available || t("register_username_taken_error")
-          return t("register_request_error")
+          try {
+            const available = await isUsernameAvailable(username)
+            return available || t("register_username_taken_error")
+          } catch {
+            return t("register_request_error")
+          } finally {
+            checkingUsernameAvailability.value = false
+          }
         }
         
         return { username, isUsernameAvailable, checkingUsernameAvailability }
@@ -188,34 +190,28 @@ q-layout
       
       async function submit() {
         loading.value = true
-        const { ok, payload } = await api.post<SessionModel>("register", {
-          "username": usedUsername.username.value,
-          "email": usedEmail.email.value,
-          "password": usedPass.password.value,
-          "captcha": await recaptcha.execute("login")
-        })
-        
-        if (ok) {
-          openSession(payload)
-          loading.value = false
+        try {
+          const session = await register({
+            username: usedUsername.username.value,
+            email: usedEmail.email.value,
+            password: usedPass.password.value,
+            captcha: await recaptcha.execute("login")
+          })
+          openSession(session)
           
           const name = currentRoute.value.params.from ?? "index"
-          assert(!Array.isArray(name), "\"From\" is array, not string")
-          
-          await router.isReady()
-          await router.push({ name })
-        } else {
-          $q.notify(payload["message"])
+          assert(typeof name == "string", "\"Name\" is not string")
+          await routeTo(name)
+        } catch (e) {
+          $q.notify(e)
+        } finally {
+          loading.value = false
         }
-        loading.value = false
       }
       
       async function login() {
         const from = currentRoute.value.params.from
-        assert(!Array.isArray(from), "\"From\" is array, not string")
-        await router.isReady()
-        await router.push({ name: "login", params: { from, ...currentRoute.value.params } })
-        
+        await routeTo("login", { from })
       }
       
       return {
