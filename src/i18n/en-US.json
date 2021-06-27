@@ -1,0 +1,137 @@
+{
+  "album": {
+    "button": {
+      "upload": "Upload"
+    },
+    "dialog": {
+      "description": "Description",
+      "error": {
+        "too_short_title": "Too short title"
+      },
+      "tags": "Tags",
+      "title": "Title"
+    }
+  },
+  "auction": {
+    "button": {
+      "add_lot": "Add lot",
+      "done": "Done"
+    },
+    "description": "Auction description",
+    "dialog": {
+      "delete_lot": {
+        "message": "Are you sure you want to delete this lot?",
+        "title": "Warning!"
+      },
+      "edit_lot": {
+        "confirm_lot": "Confirm",
+        "delete_lot": "Delete lot",
+        "form": {
+          "buyout_price": "Buyout Price",
+          "description": "Lot description",
+          "increment": "Increment",
+          "opening_price": "Opening Price",
+          "prices": "Prices",
+          "title": "Lot name"
+        },
+        "title": "Lot"
+      }
+    },
+    "error": {
+      "title_must_contain_letters": "Title must contain letters",
+      "too_many_tags": "Too many tags",
+      "too_short_title": "Too short title"
+    },
+    "image_uploader": "Please drop your artwork (or select file you want)",
+    "tags": "Enter tags",
+    "title": "Auction title"
+  },
+  "create_element_menu": {
+    "new_auction": "New auction",
+    "new_commission": "New commission",
+    "new_portfolio": "Upload portfolio"
+  },
+  "email_verification": {
+    "dialog": {
+      "message": "A message has been sent to your mailbox containing a link to confirm the correct e-mail address. Please follow the link to complete your registration. If the email has not arrived within 15 minutes, check your Spam folder. If the letter suddenly got into this folder, open the letter, click the \"Not spam\" button and follow the confirmation link. If the letter is not in the \"Spam\" folder either, try sending the letter again. You may have entered the address incorrectly. "
+    },
+    "message": "Verifying E-mail"
+  },
+  "header_user_menu": {
+    "button": {
+      "auctions": "My auctions",
+      "commissions": "My commissions",
+      "portfolio": "My portfolio"
+    },
+    "email_not_confirmed": "Confirm E-mail",
+    "logout": "Log Out",
+    "report": "Report a problem"
+  },
+  "login": {
+    "button": {
+      "register": "Register",
+      "restore_password": "Forget your password? :(",
+      "submit": "Log In"
+    },
+    "field": {
+      "login": "Username or E-mail",
+      "password": "Password"
+    },
+    "message": "We missed you :)",
+    "preview_title": "Welcome back!",
+    "title": "Welcome back!"
+  },
+  "main_header": {
+    "login": "Login",
+    "register": "Register"
+  },
+  "portfolio": {
+    "albums": "Albums",
+    "button": {
+      "create_album": "Create new album",
+      "done": "Done"
+    }
+  },
+  "register": {
+    "button": {
+      "login": "I already have an account",
+      "submit": "Register"
+    },
+    "error": {
+      "email_taken": "This E-mail is already taken",
+      "empty_email": "E-mail could not be ampty",
+      "invalid_email": "E-mail is not valid",
+      "invalid_username": "Invalid username",
+      "invalid_visible_name": "Invalid visible name",
+      "password_not_equal": "Passwords are not equal",
+      "short_username": "Too short username :(",
+      "too_long_username": "Too long username",
+      "too_long_visible_name": "Too long visible name",
+      "too_short_password": "Too short password",
+      "too_short_username": "Too short username",
+      "too_short_visible_name": "Too short visible name",
+      "unhandled": "Unknown exception",
+      "username_taken": "This name is already registered :("
+    },
+    "field": {
+      "email": "E-mail",
+      "password": "Password",
+      "password_repeat": "Repeat password",
+      "username": "Username",
+      "visible_name": "Visible name"
+    },
+    "message": "Haven't been to Ratat.art yet? ",
+    "preview_title": "Welcome!",
+    "title": "Create an account"
+  },
+  "settings": {
+    "account": "Account",
+    "button": {
+      "logout": "Log out"
+    },
+    "field": {
+      "language": "Select language"
+    },
+    "language": "Language"
+  }
+}
