@@ -1,9 +1,18 @@
-import { FeedElement } from "src/models/FeedElement"
-import { AuctionLot } from "src/models/AuctionLot"
-import { Author } from "src/models/Author"
+declare module "src/models" {
+    export type Auction = {
+        id: string
+        title: string
+        description: string
+        
+        author: User | null
+        preview: Image | null
+        lots: AuctionLot[]
+        
+        created: number
+        start: number
+        end: number
+        
+        tags: string[]
+    }
+}
 
-export type Auction = {
-  author: Author,
-  name: string,
-  lots: AuctionLot[]
-} & FeedElement

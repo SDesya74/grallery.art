@@ -1,6 +1,6 @@
-import { Image } from "src/models/Image"
-
-export type FeedElement = {
-  height: number,
-  preview: Image
+declare module "src/models" {
+  export type FeedElement = {
+    height: number
+    preview: Image
+  }
 }
